@@ -7,18 +7,16 @@
 
 // func Add(a, b int64) int64
 TEXT ·Add(SB), $0-24
-	// TODO: 引数 a を AX レジスタに読み込む
-	
-	// TODO: 引数 b を BX レジスタに読み込む
-	
-	// TODO: AX と BX を加算（結果は AX に格納される）
-	
-	// TODO: 結果を戻り値の位置に書き込む
-	
+	MOVQ a+0(FP), AX
+  MOVQ c+8(FP), BX
+  ADDQ BX, AX
+  MOVQ AX, ret+16(FP)
 	RET
 
 // func Sub(a, b int64) int64
 TEXT ·Sub(SB), $0-24
-	// TODO: 引き算を実装
-	
+  MOVQ a+0(FP), AX
+  MOVQ a+8(FP), BX
+  SUBQ BX, AX
+  MOVQ AX, ret+16(FP)
 	RET

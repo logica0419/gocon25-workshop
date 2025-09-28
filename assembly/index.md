@@ -49,11 +49,13 @@ Go は独自のアセンブリ記法を使用します：
 ## Step 1: アセンブリを読む
 
 ### ゴール
+
 Go コードから生成されるアセンブリを読んで理解できるようになる
 
 ### 学習内容
 
 Go コンパイラが生成するアセンブリを観察し、以下を理解します：
+
 - 関数の呼び出し規約
 - レジスタの使い方
 - スタックフレームの構造
@@ -62,34 +64,34 @@ Go コンパイラが生成するアセンブリを観察し、以下を理解�
 
 #### AMD64 (x86-64) アーキテクチャ
 
-| 命令 | 説明 | 例 |
-|------|------|-----|
-| MOVQ | 64ビット値の移動 | `MOVQ AX, BX` (AX → BX) |
-| ADDQ | 64ビット加算 | `ADDQ BX, AX` (AX += BX) |
-| SUBQ | 64ビット減算 | `SUBQ BX, AX` (AX -= BX) |
-| RET | 関数から戻る | `RET` |
+| 命令 | 説明             | 例                       |
+| ---- | ---------------- | ------------------------ |
+| MOVQ | 64ビット値の移動 | `MOVQ AX, BX` (AX → BX)  |
+| ADDQ | 64ビット加算     | `ADDQ BX, AX` (AX += BX) |
+| SUBQ | 64ビット減算     | `SUBQ BX, AX` (AX -= BX) |
+| RET  | 関数から戻る     | `RET`                    |
 
 レジスタ: AX, BX, CX, DX, SI, DI, BP, SP, R8-R15
 
 #### ARM64 (Apple Silicon など) アーキテクチャ
 
-| 命令 | 説明 | 例 |
-|------|------|-----|
-| MOVD | 64ビット値の移動 | `MOVD R0, R1` (R0 → R1) |
-| ADD | 加算 | `ADD R1, R0, R0` (R0 = R0 + R1) |
-| SUB | 減算 | `SUB R1, R0, R0` (R0 = R0 - R1) |
-| RET | 関数から戻る | `RET` |
+| 命令 | 説明             | 例                              |
+| ---- | ---------------- | ------------------------------- |
+| MOVD | 64ビット値の移動 | `MOVD R0, R1` (R0 → R1)         |
+| ADD  | 加算             | `ADD R1, R0, R0` (R0 = R0 + R1) |
+| SUB  | 減算             | `SUB R1, R0, R0` (R0 = R0 - R1) |
+| RET  | 関数から戻る     | `RET`                           |
 
 レジスタ: R0-R30, RSP (スタックポインタ)
 
 ### 疑似レジスタ
 
-| レジスタ | 説明 |
-|----------|------|
-| FP | Frame Pointer - 引数と戻り値にアクセス |
-| SP | Stack Pointer - ローカル変数にアクセス |
-| SB | Static Base - グローバル変数にアクセス |
-| PC | Program Counter - 次の命令のアドレス |
+| レジスタ | 説明                                   |
+| -------- | -------------------------------------- |
+| FP       | Frame Pointer - 引数と戻り値にアクセス |
+| SP       | Stack Pointer - ローカル変数にアクセス |
+| SB       | Static Base - グローバル変数にアクセス |
+| PC       | Program Counter - 次の命令のアドレス   |
 
 ### 実践
 
@@ -105,6 +107,7 @@ make add
 ### 観察ポイント
 
 #### 1. add関数
+
 ```go
 func add(a, b int) int {
     return a + b
@@ -112,6 +115,7 @@ func add(a, b int) int {
 ```
 
 実際に生成されるアセンブリ（最適化なし `-N -l`）：
+
 ```asm
 main.add STEXT nosplit size=39 args=0x10 locals=0x10
     TEXT    main.add(SB), NOSPLIT|ABIInternal, $16-16
@@ -129,11 +133,13 @@ main.add STEXT nosplit size=39 args=0x10 locals=0x10
 ```
 
 **重要なポイント**：
+
 - Go 1.17以降、ABIInternal により引数は AX, BX レジスタで渡される
 - スタック操作（PUSHQ/POPQ）で関数の開始/終了を管理
 - 最適化を無効にすると、中間的なスタック操作が見える
 
 #### 2. sub関数
+
 ```go
 func sub(a, b int) int {
     return a - b
@@ -141,6 +147,7 @@ func sub(a, b int) int {
 ```
 
 生成されるアセンブリでは、ADDQ の代わりに SUBQ 命令が使われます：
+
 ```asm
 main.sub STEXT nosplit size=39 args=0x10 locals=0x10
     TEXT    main.sub(SB), NOSPLIT|ABIInternal, $16-16
@@ -155,6 +162,7 @@ main.sub STEXT nosplit size=39 args=0x10 locals=0x10
 ## Step 2: アセンブリで関数を書く
 
 ### ゴール
+
 Go アセンブリで簡単な関数を実装できるようになる
 
 ### 学習内容
@@ -178,15 +186,18 @@ TEXT ·FuncName(SB), NOSPLIT, $0-24
 ### 実装タスク
 
 ⚠️ **重要**: あなたの CPU アーキテクチャに合ったファイルを編集してください：
+
 - **Intel/AMD CPU**: `skeleton/step2/asm_amd64.s`
 - **Apple Silicon (M1/M2/M3)**: `skeleton/step2/asm_arm64.s`
 
 アーキテクチャの確認方法：
+
 ```bash
 go env GOARCH  # amd64 または arm64 が表示されます
 ```
 
 #### 1. Add関数の実装
+
 2つの int64 を足し算する関数を実装：
 
 ```asm
@@ -197,18 +208,21 @@ TEXT ·Add(SB), NOSPLIT, $0-24
 ```
 
 ヒント（AMD64）：
+
 - `a` は `a+0(FP)` でアクセス → `MOVQ a+0(FP), AX`
 - `b` は `b+8(FP)` でアクセス → `MOVQ b+8(FP), BX`
 - 加算は `ADDQ BX, AX`
 - 戻り値は `ret+16(FP)` に書き込む → `MOVQ AX, ret+16(FP)`
 
 ヒント（ARM64）：
+
 - `a` は `a+0(FP)` でアクセス → `MOVD a+0(FP), R0`
 - `b` は `b+8(FP)` でアクセス → `MOVD b+8(FP), R1`
 - 加算は `ADD R1, R0, R0`
 - 戻り値は `ret+16(FP)` に書き込む → `MOVD R0, ret+16(FP)`
 
 #### 2. Sub関数の実装
+
 2つの int64 を引き算する関数を実装：
 
 ```asm
@@ -219,9 +233,9 @@ TEXT ·Sub(SB), NOSPLIT, $0-24
 ```
 
 ヒント：
+
 - AMD64: `SUBQ` 命令で引き算（AX = AX - BX）
 - ARM64: `SUB` 命令で引き算（R0 = R0 - R1）
-
 
 ### テストの実行
 
@@ -243,9 +257,8 @@ go test -v
 学んだ知識は以下の場面で活用できます：
 
 - **標準ライブラリの理解**
-   - Go schedulerの実装理解
-   - math、syncのようなランタイムレベルでの操作を必要とするライブラリの理解
-
+  - Go schedulerの実装理解
+  - math、syncのようなランタイムレベルでの操作を必要とするライブラリの理解
 
 ## 参考資料
 
